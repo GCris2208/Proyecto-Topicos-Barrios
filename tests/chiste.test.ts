@@ -20,34 +20,42 @@ describe('Pruebas del API de Chistes', () => {
     });
 
     describe('POST /api/chistes', () => {
-        it('Debería crear un nuevo chiste y retornar código 201', async () => {
+        it('Debería crear un nuevo chiste con autor por defecto y retornar código 201', async () => {
             const nuevoChiste = {
-                texto: '¿Qué hace una abeja en el gimnasio? ¡Zum-ba!',
-                autor: 'Cristian',
-                categoria: 'Dad joke',
-                puntaje: 8
+                texto: '¿Qué le dice un espagueti a otro? ¡El cuerpo me pide salsa!',
+                puntaje: 8,
+                categoria: 'Chistoso'
+                // No enviamos autor para probar que se asigne el valor por defecto
             };
-
-            const res = await request(app)
-                .post('/api/chistes')
-                .send(nuevoChiste);
-
-            expect(res.status).toBe(201); // 201 significa "Creado"
-            expect(res.body).toHaveProperty('_id'); // Mongo debe haberle asignado un ID
-            expect(res.body.texto).toBe(nuevoChiste.texto);
+            
+            const res = await request(app).post('/api/chistes').send(nuevoChiste);
+            
+            expect(res.status).toBe(201);
+            expect(res.body).toHaveProperty('_id');
+            expect(res.body.autor).toBe('Se perdió en el Ávila como Led');
         });
 
         it('Debería retornar error 400 si falta el texto del chiste', async () => {
-            const chisteInvalido = {
-                categoria: 'Malo',
-                puntaje: 5
-            };
+            const res = await request(app).post('/api/chistes').send({ puntaje: 5, categoria: 'Malo' });
+            expect(res.status).toBe(400);
+        });
 
-            const res = await request(app)
-                .post('/api/chistes')
-                .send(chisteInvalido);
+        it('Debería retornar error 400 si el puntaje no está entre 1 y 10', async () => {
+            const res = await request(app).post('/api/chistes').send({ 
+                texto: 'Chiste cualquiera', 
+                puntaje: 15, // Puntaje inválido
+                categoria: 'Malo' 
+            });
+            expect(res.status).toBe(400);
+        });
 
-            expect(res.status).toBe(400); // 400 significa "Bad Request" (Petición incorrecta)
+        it('Debería retornar error 400 si la categoría no es válida', async () => {
+            const res = await request(app).post('/api/chistes').send({ 
+                texto: 'Chiste cualquiera', 
+                puntaje: 5, 
+                categoria: 'Inexistente' // Categoría inválida
+            });
+            expect(res.status).toBe(400);
         });
     });
 
@@ -190,14 +198,36 @@ describe('Pruebas del API de Chistes', () => {
             expect(res.status).toBe(404);
         });
     });
-    describe('GET /api/chistes/externo/chuck', () => {
-        it('Debería obtener un chiste aleatorio de la API de Chuck Norris', async () => {
-            const res = await request(app).get('/api/chistes/externo/chuck');
-            
-            expect(res.status).toBe(200); // Esperamos que la petición sea exitosa
-            expect(res.body).toHaveProperty('texto'); // Debe traer el texto del chiste
-            expect(res.body).toHaveProperty('autor', 'Chuck Norris API'); // El autor debe indicar la fuente
-            expect(res.body).toHaveProperty('categoria');
+    describe('GET /api/chistes/obtener/:tipo', () => {
+        it('Debería obtener un chiste de Chuck Norris si el parámetro es "Chuck"', async () => {
+            const res = await request(app).get('/api/chistes/obtener/Chuck');
+            expect(res.status).toBe(200);
+            expect(res.body).toHaveProperty('texto');
+        });
+
+        it('Debería obtener un Dad Joke si el parámetro es "Dad"', async () => {
+            const res = await request(app).get('/api/chistes/obtener/Dad');
+            expect(res.status).toBe(200);
+            expect(res.body).toHaveProperty('texto');
+        });
+
+        it('Debería obtener un chiste de la DB si el parámetro es "Propio"', async () => {
+            // Aseguramos que haya al menos un chiste en la DB
+            await mongoose.model('Chiste').create({
+                texto: 'Chiste de prueba para Propio',
+                puntaje: 5,
+                categoria: 'Malo'
+            });
+
+            const res = await request(app).get('/api/chistes/obtener/Propio');
+            expect(res.status).toBe(200);
+            expect(res.body).toHaveProperty('texto');
+        });
+
+        it('Debería retornar error si el parámetro no es válido', async () => {
+            const res = await request(app).get('/api/chistes/obtener/Invalido');
+            expect(res.status).toBe(400); // Bad request
+            expect(res.body).toHaveProperty('error');
         });
     });
 });
