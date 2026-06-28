@@ -4,10 +4,10 @@ import Chiste from '../models/chiste.model';
 
 export const crearChiste = async (req: Request, res: Response): Promise<void> => {
     try {
-        if (!req.body.texto) {
-            res.status(400).json({ error: 'El texto del chiste es requerido' });
-            return;
-        }
+        //if (!req.body.texto) {
+        //    res.status(400).json({ error: 'El texto del chiste es requerido' });
+        //    return;
+        //}
         const nuevoChiste = new Chiste(req.body);
         const chisteGuardado = await nuevoChiste.save();
         res.status(201).json(chisteGuardado);
