@@ -1,20 +1,20 @@
 import express, { Application } from 'express';
-import chistesRoutes from './routes/chiste.routes';
-import swaggerUi from 'swagger-ui-express';
-import swaggerSpec from './config/swagger';
+import stockRoutes from './routes/stock.routes';
+import cryptoRoutes from './routes/crypto.routes';
+import { setupSwagger } from './config/swagger';
 
 const app: Application = express();
 
 app.use(express.json());
 
-// Montamos la interfaz gráfica de Swagger en esta ruta
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+setupSwagger(app);
 
-// Montamos las rutas de chistes
-app.use('/api/chistes', chistesRoutes);
+// Rutas de AssetMatrix
+app.use('/api/v1/stocks', stockRoutes);
+app.use('/api/v1/crypto', cryptoRoutes);
 
-app.get('/api/status', (req, res) => {
-    res.status(200).json({ status: 'API funcionando correctamente' });
+app.use((req, res) => {
+    res.status(404).json({ error: 'Endpoint no encontrado en AssetMatrix API' });
 });
 
 export default app;

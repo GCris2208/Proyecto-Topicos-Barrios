@@ -1,18 +1,13 @@
 {
-  "name": "proyecto-topicos-barrios",
+  "name": "assetmatrix-api",
   "version": "1.0.0",
-  "description": "API REST para gestión de chistes - Tópicos Especiales de Programación",
+  "description": "AssetMatrix Intelligence - API REST para el Monitoreo Global de Activos Bursátiles y Criptográficos",
   "main": "src/server.ts",
   "scripts": {
     "dev": "nodemon src/server.ts",
-    "test": "jest"
+    "test": "jest",
+    "test:watch": "jest --watchAll"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/GCris2208/Proyecto-Topicos-Barrios.git"
-  },
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "axios": "^1.18.1",
     "dotenv": "^17.4.2",
@@ -27,7 +22,7 @@
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
     "@types/node": "^26.0.0",
-    "@types/supertest": "^7.2.0",
+    "@types/supertest": "^7.2.1",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
     "jest": "^30.4.2",

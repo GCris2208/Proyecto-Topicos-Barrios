@@ -1,149 +1,50 @@
 import swaggerJSDoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
+import { Application } from 'express';
 
-const swaggerOptions: swaggerJSDoc.Options = {
+const options = {
     definition: {
         openapi: '3.0.0',
         info: {
-            title: 'API de Chistes - Tópicos Especiales',
+            title: 'AssetMatrix - Financial Intelligence API',
             version: '1.0.0',
-            description: 'Documentación de la API REST para gestión de chistes integrando Chuck Norris y Dad Jokes.',
+            description: 'API REST para el Monitoreo Global de Activos Bursátiles y Criptográficos',
         },
         servers: [
             {
-                url: 'http://localhost:3000',
+                url: 'http://localhost:3000/api/v1',
                 description: 'Servidor Local',
             },
         ],
         components: {
             schemas: {
-                Chiste: {
+                StockAlert: {
                     type: 'object',
-                    required: ['texto', 'categoria', 'puntaje'],
+                    required: ['symbol', 'alertPrice'],
                     properties: {
-                        _id: { type: 'string', description: 'ID autogenerado por MongoDB' },
-                        texto: { type: 'string', description: 'El contenido del chiste' },
-                        autor: { type: 'string', description: 'Creador del chiste', default: 'Se perdió en el Ávila como Led' },
-                        categoria: { type: 'string', description: 'Categoría', enum: ['Dad joke', 'Humor Negro', 'Chistoso', 'Malo'] },
-                        puntaje: { type: 'number', description: 'Calificación del 1 al 10', minimum: 1, maximum: 10 }
-                    }
-                }
-            }
+                        symbol: { type: 'string', example: 'AAPL' },
+                        alertPrice: { type: 'number', example: 150.5 },
+                    },
+                },
+                CryptoTransaction: {
+                    type: 'object',
+                    required: ['coinId', 'type', 'amount', 'priceAtTransaction'],
+                    properties: {
+                        coinId: { type: 'string', example: 'bitcoin' },
+                        type: { type: 'string', enum: ['BUY', 'SELL'], example: 'BUY' },
+                        amount: { type: 'number', example: 0.5 },
+                        priceAtTransaction: { type: 'number', example: 65000 },
+                    },
+                },
+            },
         },
-        paths: {
-            '/api/chistes': {
-                post: {
-                    summary: 'Crea un nuevo chiste en la Base de Datos',
-                    tags: ['CRUD Principal'],
-                    requestBody: {
-                        required: true,
-                        content: {
-                            'application/json': {
-                                schema: { $ref: '#/components/schemas/Chiste' }
-                            }
-                        }
-                    },
-                    responses: {
-                        '201': { description: 'Chiste creado exitosamente' },
-                        '400': { description: 'Error de validación (faltan datos, puntaje inválido, etc.)' }
-                    }
-                }
-            },
-            '/api/chistes/obtener/{tipo}': {
-                get: {
-                    summary: 'Obtiene un chiste de forma dinámica (Chuck Norris, Dad Joke o Propio)',
-                    tags: ['Requerimiento Dinámico'],
-                    parameters: [
-                        { 
-                            in: 'path', 
-                            name: 'tipo', 
-                            required: true, 
-                            schema: { 
-                                type: 'string',
-                                enum: ['Chuck', 'Dad', 'Propio']
-                            }, 
-                            description: 'Tipo de chiste a obtener' 
-                        }
-                    ],
-                    responses: {
-                        '200': { description: 'Chiste devuelto exitosamente' },
-                        '400': { description: 'Parámetro inválido' }
-                    }
-                }
-            },
-            '/api/chistes/categoria/{categoria}': {
-                get: {
-                    summary: 'Obtiene la cantidad de chistes locales por categoría',
-                    tags: ['Filtros y Búsquedas'],
-                    parameters: [
-                        { in: 'path', name: 'categoria', required: true, schema: { type: 'string' }, description: 'Nombre de la categoría' }
-                    ],
-                    responses: {
-                        '200': { description: 'Cantidad de chistes encontrada' },
-                        '404': { description: 'No existen chistes para esta categoría' }
-                    }
-                }
-            },
-            '/api/chistes/puntaje/{puntaje}': {
-                get: {
-                    summary: 'Obtiene chistes filtrados por puntaje',
-                    tags: ['Filtros y Búsquedas'],
-                    parameters: [
-                        { in: 'path', name: 'puntaje', required: true, schema: { type: 'number' }, description: 'Puntaje del 1 al 10' }
-                    ],
-                    responses: {
-                        '200': { description: 'Lista de chistes devuelta exitosamente' },
-                        '404': { description: 'No existen chistes con ese puntaje' }
-                    }
-                }
-            },
-            '/api/chistes/{id}': {
-                get: {
-                    summary: 'Obtiene un chiste por su ID',
-                    tags: ['CRUD Principal'],
-                    parameters: [
-                        { in: 'path', name: 'id', required: true, schema: { type: 'string' }, description: 'ID en MongoDB' }
-                    ],
-                    responses: {
-                        '200': { description: 'Datos del chiste' },
-                        '404': { description: 'Chiste no encontrado' }
-                    }
-                },
-                put: {
-                    summary: 'Actualiza un chiste existente',
-                    tags: ['CRUD Principal'],
-                    parameters: [
-                        { in: 'path', name: 'id', required: true, schema: { type: 'string' } }
-                    ],
-                    requestBody: {
-                        required: true,
-                        content: {
-                            'application/json': {
-                                schema: { $ref: '#/components/schemas/Chiste' }
-                            }
-                        }
-                    },
-                    responses: {
-                        '200': { description: 'Chiste actualizado exitosamente' },
-                        '404': { description: 'Chiste no encontrado' }
-                    }
-                },
-                delete: {
-                    summary: 'Elimina un chiste por su ID',
-                    tags: ['CRUD Principal'],
-                    parameters: [
-                        { in: 'path', name: 'id', required: true, schema: { type: 'string' } }
-                    ],
-                    responses: {
-                        '200': { description: 'Chiste eliminado correctamente' },
-                        '404': { description: 'Chiste no encontrado' }
-                    }
-                }
-            }
-        }
     },
-    apis: [],
+    apis: ['./src/routes/*.ts'], // Asegúrate de que tus rutas tengan comentarios JSDoc si quieres expandir esto
 };
 
-const swaggerSpec = swaggerJSDoc(swaggerOptions);
+const swaggerSpec = swaggerJSDoc(options);
 
-export default swaggerSpec;
+export const setupSwagger = (app: Application): void => {
+    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+    console.log('Documentación disponible en http://localhost:3000/api-docs');
+};
