@@ -1,6 +1,6 @@
-## API de Chistes - Proyecto Tópicos Especiales
+## API de Cryptos - Proyecto Tópicos Especiales
 
-API REST desarrollada en Node.js, Express y MongoDB para la gestión de chistes, aplicando metodologías TDD (Test-Driven Development) y flujos de trabajo con GitFlow.
+API REST desarrollada en Node.js, Express y MongoDB para la gestión de criptomonedas y alertas, aplicando metodologías TDD (Test-Driven Development) y flujos de trabajo con GitFlow.
 
 ##  Integrantes del Equipo
 * Cristian Barrios V-31307655
@@ -12,7 +12,7 @@ API REST desarrollada en Node.js, Express y MongoDB para la gestión de chistes,
 * **Base de Datos:** MongoDB, Mongoose.
 * **Testing:** Jest, Supertest (18 pruebas automatizadas superadas).
 * **Documentación:** Swagger (OpenAPI 3.0).
-* **Integraciones:** Axios (API Chuck Norris & I Can Haz Dad Joke).
+* **Integraciones:** AlphaVantage, CoinGecko y más.
 * **Control de Versiones:** Git, GitHub (Flujo GitFlow).
 
 ---
@@ -38,6 +38,7 @@ npm install
 
 PORT=3000
 MONGODB_URI=mongodb+srv://cristianbarrios06_db_user:utVhlytl0pC8JGRP@clusterchistes.pifvce0.mongodb.net/?appName=ClusterChistes
+ALPHA_VANTAGE_API_KEY=TO8ELWUX3A8EMJQR
 
 
 ### 4. Iniciar el servidor como Developer
