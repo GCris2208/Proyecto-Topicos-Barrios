@@ -1,16 +1,10 @@
 import { Request, Response } from 'express';
 import CryptoTransaction from '../models/crypto.model';
 import { getCryptoPrice } from '../services/crypto.service';
-import { cryptoTransactionSchema } from '../validations/crypto.validation';
+//import { cryptoTransactionSchema } from '../validations/crypto.validation';
 
 export const addCryptoTransaction = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { error } = cryptoTransactionSchema.validate(req.body);
-        if (error) {
-            res.status(400).json({ error: error.details[0].message });
-            return;
-        }
-
         const newTx = new CryptoTransaction(req.body);
         await newTx.save();
         res.status(201).json({ message: 'Transacción criptográfica registrada', data: newTx });
@@ -21,7 +15,6 @@ export const addCryptoTransaction = async (req: Request, res: Response): Promise
 
 export const getCryptoPortfolioValue = async (req: Request, res: Response): Promise<void> => {
     try {
-        // Le indicamos a TS que coinId es un string
         const coinId = req.params.coinId as string;
         
         const transactions = await CryptoTransaction.find({ coinId: coinId.toLowerCase() });
@@ -47,5 +40,29 @@ export const getCryptoPortfolioValue = async (req: Request, res: Response): Prom
         });
     } catch (error: any) {
         res.status(500).json({ error: error.message });
+    }
+};
+
+export const getCryptoMarketData = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const coin = req.params.coin as string;
+        const price = await getCryptoPrice(coin);
+        res.status(200).json({ coin, currentPriceUsd: price });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+export const deleteCryptoTransaction = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { tx_id } = req.params;
+        const deletedTx = await CryptoTransaction.findByIdAndDelete(tx_id);
+        if (!deletedTx) {
+            res.status(404).json({ error: 'Transacción no encontrada' });
+            return;
+        }
+        res.status(200).json({ message: 'Registro de transacción revertido exitosamente' });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al revertir la transacción' });
     }
 };

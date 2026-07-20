@@ -1,51 +1,81 @@
 import { Router } from 'express';
-import { addCryptoTransaction, getCryptoPortfolioValue } from '../controllers/crypto.controller';
+import { createStockAlert, getStockStatus, getStockHistory, deleteStockAlert } from '../controllers/stock.controller';
+import { validarEsquema } from '../middlewares/validar.middleware';
+import { stockWatchSchema } from '../validations/stock.validation';
 
 const router = Router();
 
 /**
  * @swagger
- * /crypto/transaction:
+ * /stocks:
  *   post:
- *     summary: Registra una nueva transacción de criptomoneda en el portafolio
- *     tags: [Crypto]
+ *     summary: Crea una nueva alerta bursátil
+ *     tags: [Stocks]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/CryptoTransaction'
+ *             $ref: '#/components/schemas/StockAlert'
  *     responses:
  *       201:
- *         description: Transacción registrada exitosamente
+ *         description: Alerta creada exitosamente
  *       400:
- *         description: Error de validación en los datos enviados
+ *         description: Error de validación
  *       500:
  *         description: Error interno del servidor
  */
-router.post('/transaction', addCryptoTransaction);
+router.post('/', validarEsquema(stockWatchSchema), createStockAlert);
 
 /**
  * @swagger
- * /crypto/{coinId}/portfolio:
+ * /stocks/history:
  *   get:
- *     summary: Calcula el valor total en USD del portafolio para una moneda específica
- *     tags: [Crypto]
+ *     summary: Análisis de tendencias históricas
+ *     tags: [Stocks]
+ *     responses:
+ *       200:
+ *         description: Historial obtenido exitosamente
+ */
+router.get('/history', getStockHistory);
+
+/**
+ * @swagger
+ * /stocks/{symbol}:
+ *   get:
+ *     summary: Obtiene el estado actual de una acción y comprueba si disparó la alerta
+ *     tags: [Stocks]
  *     parameters:
  *       - in: path
- *         name: coinId
+ *         name: symbol
  *         required: true
  *         schema:
  *           type: string
- *         description: ID de la criptomoneda en CoinGecko (ej. bitcoin, ethereum)
+ *         description: Símbolo de la acción (ej. AAPL, TSLA)
  *     responses:
  *       200:
- *         description: Valor actualizado del portafolio para la moneda solicitada
+ *         description: Estado actual de la acción
  *       404:
- *         description: No hay transacciones registradas para esta moneda
- *       500:
- *         description: Error interno del servidor
+ *         description: Alerta no encontrada
  */
-router.get('/:coinId/portfolio', getCryptoPortfolioValue);
+router.get('/:symbol', getStockStatus);
+
+/**
+ * @swagger
+ * /stocks/{id}:
+ *   delete:
+ *     summary: Elimina alerta de precio
+ *     tags: [Stocks]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Alerta eliminada exitosamente
+ */
+router.delete('/:id', deleteStockAlert);
 
 export default router;

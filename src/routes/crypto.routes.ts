@@ -1,5 +1,7 @@
 import { Router } from 'express';
-import { addCryptoTransaction, getCryptoPortfolioValue } from '../controllers/crypto.controller';
+import { addCryptoTransaction, getCryptoPortfolioValue, getCryptoMarketData, deleteCryptoTransaction } from '../controllers/crypto.controller';
+import { validarEsquema } from '../middlewares/validar.middleware';
+import { cryptoTransactionSchema } from '../validations/crypto.validation';
 
 const router = Router();
 
@@ -23,7 +25,7 @@ const router = Router();
  *       500:
  *         description: Error interno del servidor
  */
-router.post('/transaction', addCryptoTransaction);
+router.post('/transaction', validarEsquema(cryptoTransactionSchema), addCryptoTransaction);
 
 /**
  * @swagger
@@ -47,5 +49,41 @@ router.post('/transaction', addCryptoTransaction);
  *         description: Error interno del servidor
  */
 router.get('/:coinId/portfolio', getCryptoPortfolioValue);
+
+/**
+ * @swagger
+ * /crypto/{coin}:
+ *   get:
+ *     summary: Consulta market cap y fluctuación 24h
+ *     tags: [Crypto]
+ *     parameters:
+ *       - in: path
+ *         name: coin
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Datos de mercado obtenidos exitosamente
+ */
+router.get('/:coin', getCryptoMarketData);
+
+/**
+ * @swagger
+ * /crypto/{tx_id}:
+ *   delete:
+ *     summary: Revierte registro de transacción
+ *     tags: [Crypto]
+ *     parameters:
+ *       - in: path
+ *         name: tx_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Transacción revertida
+ */
+router.delete('/:tx_id', deleteCryptoTransaction);
 
 export default router;
